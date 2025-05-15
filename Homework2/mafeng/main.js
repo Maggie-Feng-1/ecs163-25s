@@ -1,4 +1,4 @@
-// for scaling to window browser
+// for scaling to window brower
 const width = window.innerWidth;
 const height = window.innerHeight;
 
@@ -10,7 +10,7 @@ const heatlegendWidth = 20;
 const heatlegendHeight = heatHeight * 0.5;
 
 // donut chart plots
-const pieMargin = {top: 50};
+const pieMargin = {top: 50, bottom: 50};
 const pieWidth = width * 0.4;
 const pieHeight = height * 0.4;
 const pieRadius = Math.min(pieWidth, pieHeight) / 2; // leave space for labels
@@ -90,8 +90,13 @@ d3.csv('pokemon.csv').then(function(data) {
    
     /** Create the svg for the plots */
     const svg = d3.select('svg')
-    .attr('width', width)  // can customize the width to fit to screen.
-    .attr('height', height);   // can increase to make vertical scrolling
+    .attr('viewBox', `0 0 ${width} ${height}`);
+    // .attr('width', width)  // can customize the width to fit to screen.
+    // .attr('height', height);   // can increase to make vertical scrolling
+
+    const heatsvg = svg.append('g')
+      .attr('transform', `translate(0, 0)`)
+    
 
     /**
      * For the following, I got help from https://d3-graph-gallery.com/graph/heatmap_tooltip.html.
@@ -104,17 +109,17 @@ d3.csv('pokemon.csv').then(function(data) {
       .domain(types1)
       .padding(0.05); // gaps between the scalings
     // Adds the x scale for the heat map and can change position of where the scale is
-    svg.append('g')
+    heatsvg.append('g')
       .attr('transform', 'translate(50, 725)') // change position of x scale
       .call(d3.axisBottom(xScale))
     // Rotates the x axis labels for better visibility
-    svg.selectAll('text')
+    heatsvg.selectAll('text')
         .attr('transform', 'rotate(-45)') // rotating the text
         .style('text-anchor', 'end') // makes sure the text is at the end of the anchor of the x axis scale
         .attr('dx', '-0.8em') // changes the horizontal position of the labels by a tiny bit
         .attr('dy', '0.15em'); // changes the vertical position of the labels by a tiny bit, prevents it from overlapping from x axis
     // Adds the axis title for the x scale the axis names and can change the position
-    svg.append('text')
+    heatsvg.append('text')
         .attr('class', 'x axis-label')
         .attr('transform', 'translate(400, 775)')
         .attr('text-anchor', 'middle')
@@ -127,11 +132,11 @@ d3.csv('pokemon.csv').then(function(data) {
       .domain(types2)
       .padding(0.05); // gaps between the scalings
     // Adds the y scale for the heat map and can change the position of where the scale is
-    svg.append('g')
+    heatsvg.append('g')
       .attr('transform', 'translate(150, 375)') // change position of y scale 
       .call(d3.axisLeft(yScale))
     // Adds the axis title for the y scale names and can change the position
-    svg.append('text')
+    heatsvg.append('text')
         .attr('class', 'y axis-label')
         .attr('transform', `rotate(-90)`) // roate the y axis title
         .attr('x', -600) // since rotated, this changes the y position of the axis title
@@ -141,7 +146,7 @@ d3.csv('pokemon.csv').then(function(data) {
         .attr('style', 'max-width: 100%; font: 12px sans-serif;');
 
     // Adds the title for the overall visualization.
-    svg.append('text')
+    heatsvg.append('text')
       .attr('class', 'title')
       .attr('transform', `translate(400, 415)`)
         .attr('text-anchor', 'middle')
@@ -159,7 +164,7 @@ d3.csv('pokemon.csv').then(function(data) {
         .range(['white', '#0d8a08']) // make the color scale from white to dark green
 
     // This creates the squares for the heat map
-    svg.selectAll()
+    heatsvg.selectAll()
         .data(heatmapData)
         .enter()
         .append('rect')
@@ -172,7 +177,7 @@ d3.csv('pokemon.csv').then(function(data) {
         .attr('class', 'cell');
 
     // This adds the count of each type combination according to the squares.
-    svg.selectAll('text.count')
+    heatsvg.selectAll('text.count')
       .data(heatmapData)
       .enter()
       .append('text')
@@ -447,6 +452,7 @@ piesvg.append('text')
   .attr('class', 'title')
   // .attr('transform', `translate(${width}, ${pieMargin.top - 200})`)
   .attr('transform', `translate(0, -170)`)
+    // .attr('transform', `translate(0, ${height})`)
   .attr('text-anchor', 'middle')
   .style('font-weight', 'bold')
   .style('font-size', '16px')
