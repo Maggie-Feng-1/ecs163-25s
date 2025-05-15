@@ -74,10 +74,14 @@ d3.csv('pokemon.csv').then(function(data) {
    
     /** Create the svg for the plots */
     const svg = d3.select('svg')
-    .attr('viewBox', `0 0 ${width} ${height}`)
-    .attr('preserveAspectRatio', 'xMidYMid meet');
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'xMidYMid meet');
 
-    // make svg for heatmap
+    /**
+     * Make the separate svg to add to the svg. The heatmap svg.
+     * Originally got the code and had chatgpt help me reformat to fit into the svg container. It was a bit challenging.
+     * However, adding the separate svg was helpful when opening on a separate computer browser.
+     */
     const heatsvg = svg.append('g')
       .attr('class', 'heatmap-group')
       .attr('transform', `translate(${heatMargin.left}, ${height - heatHeight })`);
@@ -185,7 +189,7 @@ d3.csv('pokemon.csv').then(function(data) {
      * This creates the legend svg and can change the position and location of the legend bar.
      * Got help following this link: https://gist.github.com/vialabdusp/9b6dce37101c30ab80d0bf378fe5e583.
      */
-    const heatlegendSvg = heatsvg.append('g')
+    const heatlegendSvg = heatsvg.append('g') // this adds the legend to the heat svg, so they stay as grouped
       .attr('transform', `translate(${heatWidth - heatMargin.left + 10 }, 0)`); // relative to heatmap group
 
     // Creating the linear gradient for the legend
@@ -214,7 +218,7 @@ d3.csv('pokemon.csv').then(function(data) {
       .attr('height', heatlegendHeight)
       .style('fill', 'url(#legend-gradient)');
 
-    // scALE For the legend
+    // scale For the legend, add the legend 
     const heatlegendScale = d3.scaleLinear()
       .domain([0, heatmaxCount])
       .range([heatlegendHeight, 0]);
@@ -237,6 +241,7 @@ d3.csv('pokemon.csv').then(function(data) {
    * Additional help
    */
   nameCols = ['HP', 'Attack', 'Defense', 'Sp_Atk', 'Sp_Def', 'Speed', 'Total']; // These are the base statistics of each pokemon.
+  
   // Create the x scale for the parallel coordinate
   const parX = d3.scalePoint()
     .domain(nameCols)
@@ -249,12 +254,9 @@ d3.csv('pokemon.csv').then(function(data) {
       .range([parHeight - parMargin.bottom - 100, parMargin.top])]) // changes how vertically long the graph, 
   );
   
-  // Make parallel svg container
+  // Make parallel svg container, will add the things later in the code
   const parSvg = svg.append('g')
-    // .attr('transform', `translate(-10, 0)`) // moves vertical and horizontal of graph
-    // .attr('width', width)
-    // .attr('height', height);
-  
+
   // Make the parallel coordinate color scale. We are using the rainbow color scale and want to use it in terms of the 'Total' base statistic.
    const parColor = d3.scaleSequential(d3.interpolateRainbow)
     .domain(d3.extent(data, d => d[nameCols[6]]));
