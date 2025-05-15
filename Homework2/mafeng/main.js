@@ -1,4 +1,4 @@
-// for scaling to window brower
+// for scaling to window brower // Set up dimensions and margins for the SVG container
 const width = window.innerWidth;
 const height = window.innerHeight;
 
@@ -21,22 +21,6 @@ const parWidth = width;
 const parHeight = height * 0.55;
 const parLegendWidth = 175;
 const parLegendHeight = 10;
-
-
-// // Set up dimensions and margins for the SVG container
-// const heatWidth = 600, heatHeight = 400;
-// const heatMargin = {top: 50, right: 0, bottom: 50, left: 100};
-// const heatlegendWidth = 20;   
-// const heatlegendHeight = 200;  
-
-// const pieWidth = 400, pieHeight = 400;
-// const pieMargin = {top: 50};
-// const pieRadius = 350 / 2;
-
-// const parWidth = 1500, parHeight = 500;
-// const parMargin = {top: 50, right: 0, bottom: 50, left: 100};
-// const parLegendWidth = 200;
-// const parLegendHeight = 10;
 
 // opening the file to work on
 d3.csv('pokemon.csv').then(function(data) {
@@ -90,99 +74,100 @@ d3.csv('pokemon.csv').then(function(data) {
    
     /** Create the svg for the plots */
     const svg = d3.select('svg')
-    .attr('viewBox', `0 0 ${width} ${height}`);
-    // .attr('width', width)  // can customize the width to fit to screen.
-    // .attr('height', height);   // can increase to make vertical scrolling
+    .attr('viewBox', `0 0 ${width} ${height}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
 
+    // make svg for heatmap
     const heatsvg = svg.append('g')
-      .attr('transform', `translate(0, 0)`)
-    
+      .attr('class', 'heatmap-group')
+      .attr('transform', `translate(${heatMargin.left}, ${height - heatHeight })`);
 
     /**
      * For the following, I got help from https://d3-graph-gallery.com/graph/heatmap_tooltip.html.
      * This guided me to creating the heatmap.
      */
-    
-    // Create the x scale for the heat map
+
+    // create the x scale for the heat map
     const xScale = d3.scaleBand()
-      .range([heatMargin.left, heatWidth - heatMargin.right])
+      .range([0, heatWidth - heatMargin.left - heatMargin.right])
       .domain(types1)
       .padding(0.05); // gaps between the scalings
+
     // Adds the x scale for the heat map and can change position of where the scale is
     heatsvg.append('g')
-      .attr('transform', 'translate(50, 725)') // change position of x scale
-      .call(d3.axisBottom(xScale))
-    // Rotates the x axis labels for better visibility
-    heatsvg.selectAll('text')
-        .attr('transform', 'rotate(-45)') // rotating the text
-        .style('text-anchor', 'end') // makes sure the text is at the end of the anchor of the x axis scale
-        .attr('dx', '-0.8em') // changes the horizontal position of the labels by a tiny bit
-        .attr('dy', '0.15em'); // changes the vertical position of the labels by a tiny bit, prevents it from overlapping from x axis
-    // Adds the axis title for the x scale the axis names and can change the position
-    heatsvg.append('text')
-        .attr('class', 'x axis-label')
-        .attr('transform', 'translate(400, 775)')
-        .attr('text-anchor', 'middle')
-        .text('Type 1')
-        .attr('style', 'max-width: 100%; font: 12px sans-serif;');
+      .attr('transform', `translate(0, ${heatHeight - heatMargin.top - heatMargin.bottom})`)
+      .call(d3.axisBottom(xScale));
 
-    // Create the y scale for the heat map
+    // rotates the x axis labels for better visibility
+    heatsvg.selectAll('text')
+      .attr('transform', 'rotate(-45)') // rotating the text
+      .style('text-anchor', 'end') // makes sure the text is at the end of the anchor of the x axis scale
+      .attr('dx', '-0.8em') // changes the horizontal position of the labels by a tiny bit
+      .attr('dy', '0.15em'); // changes the vertical position of the labels by a tiny bit, prevents it from overlapping from x axis
+
+    // adds the axis title for the x scale the axis names and can change the position
+    heatsvg.append('text')
+      .attr('class', 'x axis-label')
+      .attr('transform', `translate(${(heatWidth - heatMargin.left - heatMargin.right) / 2}, ${heatHeight - heatMargin.top - heatMargin.bottom + 45})`)
+      .attr('text-anchor', 'middle')
+      .text('Type 1')
+      .attr('style', 'max-width: 100%; font: 12px sans-serif;');
+
+    // create the y scale for the heat map
     const yScale = d3.scaleBand()
-      .range([heatMargin.top, heatHeight - heatMargin.bottom])
+      .range([0, heatHeight - heatMargin.top - heatMargin.bottom])
       .domain(types2)
       .padding(0.05); // gaps between the scalings
-    // Adds the y scale for the heat map and can change the position of where the scale is
+
+    //  the y scale for the heat map and can change the position of where the scale is
     heatsvg.append('g')
-      .attr('transform', 'translate(150, 375)') // change position of y scale 
-      .call(d3.axisLeft(yScale))
+      .call(d3.axisLeft(yScale));
+
     // Adds the axis title for the y scale names and can change the position
     heatsvg.append('text')
-        .attr('class', 'y axis-label')
-        .attr('transform', `rotate(-90)`) // roate the y axis title
-        .attr('x', -600) // since rotated, this changes the y position of the axis title
-        .attr('y', 80) // since rotated, this changes the x position of the axis title
-        .attr('text-anchor', 'middle') // makes sure the text is in the middle height of the graph
-        .text('Type 2')
-        .attr('style', 'max-width: 100%; font: 12px sans-serif;');
+      .attr('class', 'y axis-label')
+      .attr('transform', `rotate(-90)`) // rotate the y axis title
+      .attr('x', -((heatHeight - heatMargin.top - heatMargin.bottom) / 2)) // since rotated, this changes the y position of the axis title
+      .attr('y', -50) // since rotated, this changes the x position of the axis title
+      .attr('text-anchor', 'middle') // makes sure the text is in the middle height of the graph
+      .text('Type 2')
+      .attr('style', 'max-width: 100%; font: 12px sans-serif;');
 
     // Adds the title for the overall visualization.
     heatsvg.append('text')
       .attr('class', 'title')
-      .attr('transform', `translate(400, 415)`)
-        .attr('text-anchor', 'middle')
-        .attr('font-weight', 'bold')
-        .attr('font-size', '16px')
-        .attr('font-family', 'sans-serif')
-        .text('Frequency of Pokemon Type Combinations: Type 1 vs. Type 2');
+      .attr('transform', `translate(${(heatWidth - heatMargin.left - heatMargin.right) / 2}, -10)`)
+      .attr('text-anchor', 'middle')
+      .attr('font-weight', 'bold')
+      .attr('font-size', 16)
+      .attr('font-family', 'sans-serif')
+      .text('Frequency of Pokemon Type Combinations: Type 1 vs. Type 2');
 
     /**
      * This adds the color scale of the heatmaps.
      * The more count of each type 1 and type 2 combination, the darker the color.
      */
     const colorScale = d3.scaleLinear()
-        .domain([0, d3.max(heatmapData, d => d.count)])  // min to max counts, max with highest count, min for lowest counts
-        .range(['white', '#0d8a08']) // make the color scale from white to dark green
+      .domain([0, d3.max(heatmapData, d => d.count)])  // min to max counts, max with highest count, min for lowest counts
+      .range(['white', '#0d8a08']); // make the color scale from white to dark green
 
     // This creates the squares for the heat map
     heatsvg.selectAll()
-        .data(heatmapData)
-        .enter()
-        .append('rect')
-        .attr('transform', `translate(50, 375)`) // Change position and location of the squares
-        .attr('x', d => xScale(d.type1)) // Use the x scale we created earlier for the squares as well
-        .attr('y', d => yScale(d.type2)) // Use the y scale we created earlier for the squares as well
-        .attr('width', xScale.bandwidth())
-        .attr('height', yScale.bandwidth())
-        .attr('fill', d => colorScale(d.count)) // Fill the squares with the color scales according to count.
-        .attr('class', 'cell');
+      .data(heatmapData)
+      .enter()
+      .append('rect')
+      .attr('x', d => xScale(d.type1)) // Use the x scale we created earlier for the squares as well
+      .attr('y', d => yScale(d.type2)) // Use the y scale we created earlier for the squares as well
+      .attr('width', xScale.bandwidth())
+      .attr('height', yScale.bandwidth())
+      .attr('fill', d => colorScale(d.count)) // Fill the squares with the color scales according to count.
+      .attr('class', 'cell');
 
     // This adds the count of each type combination according to the squares.
     heatsvg.selectAll('text.count')
       .data(heatmapData)
       .enter()
       .append('text')
-      .attr('transform', `translate(50, 375)`) // location of the count text
-      .attr('class', 'count')
       .attr('x', d => xScale(d.type1) + xScale.bandwidth() / 2) // location of text, x
       .attr('y', d => yScale(d.type2) + yScale.bandwidth() / 2) // location of text, y
       .attr('text-anchor', 'middle') // centers text, x position
@@ -192,49 +177,54 @@ d3.csv('pokemon.csv').then(function(data) {
       .text(d => d.count); // Text is the number of count for specific type 1 and type 2 combination 
 
     /**
-     * This compares the different counts of type combinations and gets the highest number to use in the legend bar/
+     * This compares the different counts of type combinations and gets the highest number to use in the legend bar
      */
     const heatmaxCount = d3.max(heatmapData, d => d.count); // get max count for the legend bar
+
     /**
      * This creates the legend svg and can change the position and location of the legend bar.
      * Got help following this link: https://gist.github.com/vialabdusp/9b6dce37101c30ab80d0bf378fe5e583.
      */
-    const heatlegendSvg = d3.select('svg') // creating the legend and location of the legend
-        .append('g')
-        .attr('transform', 'translate(620, 50)'); 
-    // Creating the linear gradient for the legend, how to format the gradient and the way it flows
-    const linearGradient = heatlegendSvg.append('defs') // defining the gradient for the legend svg we created.
+    const heatlegendSvg = heatsvg.append('g')
+      .attr('transform', `translate(${heatWidth - heatMargin.left + 10 }, 0)`); // relative to heatmap group
+
+    // Creating the linear gradient for the legend
+    const linearGradient = heatlegendSvg.append('defs')
       .append('linearGradient')
       .attr('id', 'legend-gradient')
-      .attr('x1x', '0%')
-      .attr('y1', '100%') // makes color continuous from up to down, the following.
-      .attr('x2', '0%') // makes the color continuous from the left to right side of the legend color scale
-    // Creating the color scheme of the linear gradient 
+      .attr('x1', '0%')
+      .attr('y1', '100%') // makes the gradient vertical up to down
+      .attr('x2', '0%')
+      .attr('y2', '0%');
+
+    //  the color scheme of the linear gradient 
     linearGradient.selectAll('stop')
       .data([
-          { offset: '0%', color: 'white'}, // Gradient from white
-          { offset: '100%', color: '#0d8a08'} // Gradient from green
+        { offset: '0%', color: 'white' }, // Gradient from white
+        { offset: '100%', color: '#0d8a08' } // Gradient to green
       ])
       .enter()
       .append('stop')
       .attr('offset', d => d.offset)
       .attr('stop-color', d => d.color);
-    // Creates the rectangular shape for the legend.
-    heatlegendSvg.append('rect') 
-      .attr('transform', 'translate(80, 375)') // position of the legend 
+
+    //the rectangular shape for the legend.
+    heatlegendSvg.append('rect')
       .attr('width', heatlegendWidth)
       .attr('height', heatlegendHeight)
-      .style('fill', 'url(#legend-gradient)'); // fills the rectangle with the continuous gradient
-    // Create the scale for the legend color gradient
+      .style('fill', 'url(#legend-gradient)');
+
+    // scALE For the legend
     const heatlegendScale = d3.scaleLinear()
-        .domain([0, heatmaxCount])
-        .range([heatlegendHeight, 0]);  // top to bottom
-    // Create the axis for the legend, 5 ticks
+      .domain([0, heatmaxCount])
+      .range([heatlegendHeight, 0]);
+
     const heatlegendAxis = d3.axisRight(heatlegendScale).ticks(5);
-    // Adds the axis for the legend, location of legend axis
+
+    // Adds the axis for the legend
     heatlegendSvg.append('g')
-        .attr('transform', 'translate(100, 375)') // position of the legend axis
-        .call(heatlegendAxis);
+      .attr('transform', `translate(${heatlegendWidth}, 0)`)
+      .call(heatlegendAxis);
 
 
   /**
@@ -327,9 +317,8 @@ d3.csv('pokemon.csv').then(function(data) {
 /**
  * The following makes the legend for the parallel coordinate plot.
  */
-const parlegendsvg = d3.select('svg')
-  .append('g')
-  .attr('transform', `translate(${height - parHeight + 250}, ${parMargin.top - 10})`); // location of legend
+const parlegendsvg = parSvg.append('g')
+  .attr('transform', `translate(${parWidth - parLegendWidth - 40}, ${parHeight + 30})`);
 
 // Making the rainbow gradient for the legend
 const rainbowGradient = parlegendsvg.append('defs')
@@ -351,10 +340,11 @@ rainbowGradient.selectAll('stop')
   .attr('stop-color', d => parColor(parMinScore + (d / 10) * (parMaxScore - parMinScore))); // divide by 10 for the rainbow
 // Add the rectangle of the legend and the rainbow gradient.
 parlegendsvg.append('rect')
-  .attr('transform', `translate(580, 340)`) // location of the legend bar
+  .attr('transform', `translate(-50, -80)`) // location of the legend bar
   .attr('width', parLegendWidth)
   .attr('height', parLegendHeight)
   .style('fill', 'url(#rainbow-gradient)');
+
 // Add the parallel coordinate axis scale
 const parlegendScale = d3.scaleLinear()
   .domain([parMinScore, parMaxScore]) // Use the minimum and maximum score of the 'Total' column to range our legend.
@@ -363,11 +353,11 @@ const parlegendScale = d3.scaleLinear()
 const parlegendAxis = d3.axisBottom(parlegendScale).ticks(5); // bottom axis, and 5 ticks
 // Location of the legend axis scale.
 parlegendsvg.append('g')
-  .attr('transform', `translate(580, 350)`)
+  .attr('transform', `translate(-50, -70)`)
   .call(parlegendAxis);
 // Add a label for the legend.
 parlegendsvg.append('text')
-.attr('transform', `translate(${height - 35}, ${parHeight - 90})`) // location of text
+.attr('transform', `translate(-80, -70)`) // location of text
   // .attr('transform', `translate(555, 350)`) // location of the label for the legend.
   .attr('fill', 'black')
   .attr('font-size', 10)
