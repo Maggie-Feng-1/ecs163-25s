@@ -1,17 +1,42 @@
-// Set up dimensions and margins for the SVG container
-const heatWidth = 600, heatHeight = 400;
+// for scaling to window browser
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+// heatmap charts
 const heatMargin = {top: 50, right: 0, bottom: 50, left: 100};
-const heatlegendWidth = 20;   
-const heatlegendHeight = 200;  
+const heatWidth = width * 0.5 - heatMargin.left - heatMargin.right;
+const heatHeight = height * 0.5;
+const heatlegendWidth = 20;
+const heatlegendHeight = heatHeight * 0.5;
 
-const pieWidth = 400, pieHeight = 400;
+// donut chart plots
 const pieMargin = {top: 50};
-const pieRadius = 350 / 2;
+const pieWidth = width * 0.4;
+const pieHeight = height * 0.4;
+const pieRadius = Math.min(pieWidth, pieHeight) / 2; // leave space for labels
 
-const parWidth = 1500, parHeight = 500;
-const parMargin = {top: 50, right: 0, bottom: 50, left: 100};
-const parLegendWidth = 200;
+// parallel coordinate plots
+const parMargin = {top: 50, right: 0, bottom: 0, left: 100};
+const parWidth = width;
+const parHeight = height * 0.55;
+const parLegendWidth = 175;
 const parLegendHeight = 10;
+
+
+// // Set up dimensions and margins for the SVG container
+// const heatWidth = 600, heatHeight = 400;
+// const heatMargin = {top: 50, right: 0, bottom: 50, left: 100};
+// const heatlegendWidth = 20;   
+// const heatlegendHeight = 200;  
+
+// const pieWidth = 400, pieHeight = 400;
+// const pieMargin = {top: 50};
+// const pieRadius = 350 / 2;
+
+// const parWidth = 1500, parHeight = 500;
+// const parMargin = {top: 50, right: 0, bottom: 50, left: 100};
+// const parLegendWidth = 200;
+// const parLegendHeight = 10;
 
 // opening the file to work on
 d3.csv('pokemon.csv').then(function(data) {
@@ -65,8 +90,8 @@ d3.csv('pokemon.csv').then(function(data) {
    
     /** Create the svg for the plots */
     const svg = d3.select('svg')
-    .attr('width', parWidth - 50)  // can customize the width to fit to screen.
-    .attr('height', 780);   // can increase to make vertical scrolling
+    .attr('width', width)  // can customize the width to fit to screen.
+    .attr('height', height);   // can increase to make vertical scrolling
 
     /**
      * For the following, I got help from https://d3-graph-gallery.com/graph/heatmap_tooltip.html.
@@ -123,7 +148,7 @@ d3.csv('pokemon.csv').then(function(data) {
         .attr('font-weight', 'bold')
         .attr('font-size', '16px')
         .attr('font-family', 'sans-serif')
-        .text('Pokemon Type Combinations: Type 1 vs. Type 2');
+        .text('Frequency of Pokemon Type Combinations: Type 1 vs. Type 2');
 
     /**
      * This adds the color scale of the heatmaps.
@@ -191,7 +216,7 @@ d3.csv('pokemon.csv').then(function(data) {
       .attr('stop-color', d => d.color);
     // Creates the rectangular shape for the legend.
     heatlegendSvg.append('rect') 
-      .attr('transform', 'translate(50, 375)') // position of the legend 
+      .attr('transform', 'translate(80, 375)') // position of the legend 
       .attr('width', heatlegendWidth)
       .attr('height', heatlegendHeight)
       .style('fill', 'url(#legend-gradient)'); // fills the rectangle with the continuous gradient
@@ -203,7 +228,7 @@ d3.csv('pokemon.csv').then(function(data) {
     const heatlegendAxis = d3.axisRight(heatlegendScale).ticks(5);
     // Adds the axis for the legend, location of legend axis
     heatlegendSvg.append('g')
-        .attr('transform', 'translate(70, 375)') // position of the legend axis
+        .attr('transform', 'translate(100, 375)') // position of the legend axis
         .call(heatlegendAxis);
 
 
@@ -231,9 +256,9 @@ d3.csv('pokemon.csv').then(function(data) {
   
   // Make parallel svg container
   const parSvg = svg.append('g')
-    .attr('transform', `translate(-10, 0)`) // moves vertical and horizontal of graph
-    .attr('width', parWidth)
-    .attr('height', parHeight);
+    // .attr('transform', `translate(-10, 0)`) // moves vertical and horizontal of graph
+    // .attr('width', width)
+    // .attr('height', height);
   
   // Make the parallel coordinate color scale. We are using the rainbow color scale and want to use it in terms of the 'Total' base statistic.
    const parColor = d3.scaleSequential(d3.interpolateRainbow)
@@ -299,7 +324,7 @@ d3.csv('pokemon.csv').then(function(data) {
  */
 const parlegendsvg = d3.select('svg')
   .append('g')
-  .attr('transform', 'translate(620, 50)'); // location of legend
+  .attr('transform', `translate(${height - parHeight + 250}, ${parMargin.top - 10})`); // location of legend
 
 // Making the rainbow gradient for the legend
 const rainbowGradient = parlegendsvg.append('defs')
@@ -337,7 +362,8 @@ parlegendsvg.append('g')
   .call(parlegendAxis);
 // Add a label for the legend.
 parlegendsvg.append('text')
-  .attr('transform', `translate(555, 350)`) // location of the label for the legend.
+.attr('transform', `translate(${height - 35}, ${parHeight - 90})`) // location of text
+  // .attr('transform', `translate(555, 350)`) // location of the label for the legend.
   .attr('fill', 'black')
   .attr('font-size', 10)
   .attr('font-family', 'sans-serif')
@@ -375,7 +401,7 @@ parlegendsvg.append('text')
   .value(d => d.value);
   // Make the arc for the donut, creating the outer and inner size, makes how big the segments are.
   const arc = d3.arc()
-  .innerRadius(pieRadius * 0.67) // how big the segments are
+  .innerRadius(pieRadius * 0.57) // how big the segments are
   .outerRadius(pieRadius - 1);
   // Gets the different counts for the pie chart.
   const arcs = pie(countData);
@@ -385,8 +411,8 @@ parlegendsvg.append('text')
    */
   // Make the svg for the donut group.
   const piesvg = svg.append('g')
-    .attr('transform', `translate(${heatWidth + 350}, ${pieHeight + 200})`) // changes horizontal, and vertical position of chart
-
+    // .attr('transform', `translate(${heatWidth + 350}, ${pieHeight + 200})`) // changes horizontal, and vertical position of chart
+    .attr('transform', `translate(${width - 500}, ${height - 200})`)
   // Adds each portion path for each value of the body style, adds the CIRCLE with cut sectors.
   piesvg.append('g')
     .attr('stroke', 'white')
@@ -419,7 +445,8 @@ parlegendsvg.append('text')
 // Adds the title for the donut chart
 piesvg.append('text')
   .attr('class', 'title')
-  .attr('transform', `translate(0, ${pieMargin.top - 235})`)
+  // .attr('transform', `translate(${width}, ${pieMargin.top - 200})`)
+  .attr('transform', `translate(0, -170)`)
   .attr('text-anchor', 'middle')
   .style('font-weight', 'bold')
   .style('font-size', '16px')
