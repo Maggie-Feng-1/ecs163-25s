@@ -1,4 +1,8 @@
 /**
+ * This is the main channel for which everything is run. But it is all called in the index.html.
+ * Many of the stuff is from Homework 2, Adding interaction and animation and transitions.
+ * 
+ * 
  * The parallel coordinate plot will allow you to see each pokemons base statisitics. 
  * There is a brushing interaction for the user to select on the axes what domain of statisics they want to see.
  * I wanted to show this because selecting where to focus on can lessen the stress of the overall parallel coordinate, and allow focus.
